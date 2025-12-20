@@ -3,14 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clicker MMO — Leaderboard Return</title>
+    <title>Clicker MMO — Levels & Experience</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #050505; color: white; text-align: center; margin: 0; padding: 20px; }
-        .score-box { font-size: 50px; margin: 10px; font-weight: 900; }
+        .score-box { font-size: 45px; margin: 10px; font-weight: 900; }
         
+        /* ШКАЛА УРОВНЯ */
+        .level-container { width: 80%; background: #222; height: 10px; border-radius: 5px; margin: 0 auto 20px; overflow: hidden; border: 1px solid #333; }
+        #level-bar { width: 0%; height: 100%; background: linear-gradient(to right, #3b82f6, #00f2fe); transition: 0.3s; }
+        #level-text { font-size: 14px; color: #aaa; margin-bottom: 5px; }
+
         #click-btn { 
-            width: 180px; height: 180px; border-radius: 50%; border: none; font-size: 70px; cursor: pointer; 
-            transition: 0.1s; margin: 20px auto; display: flex; align-items: center; justify-content: center; 
+            width: 170px; height: 170px; border-radius: 50%; border: none; font-size: 70px; cursor: pointer; 
+            transition: 0.1s; margin: 10px auto; display: flex; align-items: center; justify-content: center; 
         }
         #click-btn:active { transform: scale(0.85); }
 
@@ -25,45 +30,61 @@
         .skin-void { background: #111; box-shadow: 0 0 20px #444; border: 4px solid #666; }
 
         .panel { background: #111; padding: 15px; border-radius: 20px; margin-bottom: 12px; border: 1px solid #222; }
-        .btn { padding: 12px; border-radius: 12px; border: none; cursor: pointer; font-weight: bold; width: 100%; }
-        input { background: #1a1a1a; border: 1px solid #333; color: white; padding: 12px; border-radius: 12px; width: 60%; }
+        .btn { padding: 12px; border-radius: 12px; border: none; cursor: pointer; font-weight: bold; }
+        input { background: #1a1a1a; border: 1px solid #333; color: white; padding: 12px; border-radius: 12px; font-size: 14px; }
 
-        /* ТАБЛИЦА ЛИДЕРОВ */
-        .leaderboard { background: #0a0a0a; border-radius: 25px; padding: 20px; text-align: left; border: 1px solid #111; margin-top: 20px; }
-        .leaderboard-title { text-align: center; color: #444; font-size: 14px; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 2px; }
-        .entry { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #111; font-size: 16px; }
-        .entry:last-child { border-bottom: none; }
-        .is-me { color: #38bdf8; background: rgba(56, 189, 248, 0.05); border-radius: 10px; font-weight: bold; }
-        .rank { color: #444; margin-right: 10px; width: 25px; display: inline-block; }
+        /* ЧАТ */
+        #chat-box { height: 180px; overflow-y: auto; text-align: left; padding: 10px; background: #0a0a0a; border-radius: 15px; border: 1px solid #222; margin-bottom: 10px; font-size: 13px; }
+        .msg { margin-bottom: 6px; border-bottom: 1px solid #111; padding-bottom: 4px; }
+        .msg b { color: #38bdf8; }
+        .lvl-tag { color: #fbbf24; font-size: 11px; margin-right: 5px; font-weight: bold; }
+
+        /* ТАБЛИЦА */
+        .leaderboard { background: #0a0a0a; border-radius: 20px; padding: 15px; text-align: left; border: 1px solid #111; }
+        .entry { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #111; font-size: 14px; }
+        .is-me { color: #38bdf8; background: rgba(56, 189, 248, 0.05); border-radius: 8px; }
     </style>
 </head>
 <body>
 
     <div id="game-content">
-        <div id="player-display" onclick="changeName()" style="color: #666; cursor: pointer; margin-bottom: 10px;">Загрузка профиля...</div>
+        <div id="player-display" onclick="changeName()" style="color: #666; cursor: pointer; margin-bottom: 5px;">Загрузка...</div>
+        
+        <div id="level-text">Уровень 1</div>
+        <div class="level-container"><div id="level-bar"></div></div>
+
         <div class="score-box"><span id="score">0</span> 💰</div>
 
         <button id="click-btn" class="skin-default">🔘</button>
 
         <div class="panel">
-            <button class="btn" id="open-case" style="background: #f59e0b; color: white;">ОТКРЫТЬ КЕЙС (1000 💰)</button>
-            <div id="case-result" style="margin-top: 10px; color: #fbbf24; min-height: 20px; font-weight: bold;"></div>
+            <button class="btn" id="open-case" style="background: #f59e0b; color: white; width: 100%;">ОТКРЫТЬ КЕЙС (1000 💰)</button>
+            <div id="case-result" style="margin-top: 8px; color: #fbbf24; font-size: 14px; font-weight: bold;"></div>
         </div>
 
         <div class="panel">
-            <input type="text" id="promo-input" placeholder="Промокод">
-            <button class="btn" onclick="applyPromo()" style="background:#fff; color:#000; width:30%; display: inline-block;">OK</button>
+            <h3 style="margin: 0 0 10px 0; font-size: 12px; color: #444;">ЧАТ ИГРОКОВ</h3>
+            <div id="chat-box"></div>
+            <div style="display: flex; gap: 5px;">
+                <input type="text" id="chat-input" placeholder="Сообщение..." style="flex-grow: 1;">
+                <button class="btn" onclick="sendMsg()" style="background: #3b82f6; color: white;">></button>
+            </div>
+        </div>
+
+        <div class="panel">
+            <input type="text" id="promo-input" placeholder="Промокод" style="width: 60%;">
+            <button class="btn" onclick="applyPromo()" style="background:#fff; color:#000; width:30%;">OK</button>
         </div>
 
         <div class="leaderboard">
-            <div class="leaderboard-title">ТОП ИГРОКОВ</div>
+            <div style="text-align: center; color: #444; font-size: 11px; margin-bottom: 8px;">ТОП-10 МАГНАТОВ</div>
             <div id="leaders"></div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, get, child, update, onValue, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, get, child, update, onValue, query, orderByChild, limitToLast, push, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyB6UkjtQQR2UzJdSL7aendfBzct4KNFCf4",
@@ -79,7 +100,7 @@
         let myId = localStorage.getItem('my_unique_id') || 'u' + Date.now();
         localStorage.setItem('my_unique_id', myId);
 
-        let score = 0, myName = "Игрок", currentSkin = "default", usedPromos = {};
+        let score = 0, myName = "Игрок", currentSkin = "default", usedPromos = {}, level = 1, xp = 0;
 
         const skinMap = {
             'default': { emoji: '🔘', multi: 1 },
@@ -95,6 +116,13 @@
         function updateUI() {
             document.getElementById('score').innerText = score.toLocaleString();
             document.getElementById('player-display').innerText = myName;
+            
+            // Расчет шкалы опыта
+            let nextLevelXp = level * 100; 
+            let progress = (xp / nextLevelXp) * 100;
+            document.getElementById('level-bar').style.width = progress + "%";
+            document.getElementById('level-text').innerText = `Уровень ${level} (${xp}/${nextLevelXp} XP)`;
+
             const btn = document.getElementById('click-btn');
             btn.className = 'skin-' + currentSkin;
             btn.innerText = skinMap[currentSkin]?.emoji || '🔘';
@@ -102,91 +130,99 @@
 
         function save() {
             update(ref(db, 'users/' + myId), {
-                name: myName, score: score, skin: currentSkin, usedPromos: usedPromos
+                name: myName, score: score, skin: currentSkin, usedPromos: usedPromos, level: level, xp: xp
             });
         }
 
         document.getElementById('click-btn').addEventListener('pointerdown', () => {
-            score += (skinMap[currentSkin]?.multi || 1);
+            let gain = (skinMap[currentSkin]?.multi || 1);
+            score += gain;
+            xp += gain; // Опыт идет от силы клика
+
+            // Проверка повышения уровня
+            if (xp >= level * 100) {
+                xp = 0;
+                level++;
+                alert("НОВЫЙ УРОВЕНЬ: " + level + "! 🎉");
+            }
+
             updateUI();
             if (score % 25 === 0) save();
         });
 
-        // Промокоды
+        window.sendMsg = () => {
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if (!text) return;
+            push(ref(db, 'chat'), { name: myName, text: text, level: level, time: serverTimestamp() });
+            input.value = "";
+        };
+
+        onValue(query(ref(db, 'chat'), limitToLast(15)), (snap) => {
+            const box = document.getElementById('chat-box');
+            box.innerHTML = "";
+            snap.forEach((child) => {
+                const m = child.val();
+                box.innerHTML += `<div class="msg"><span class="lvl-tag">[Lvl ${m.level || 1}]</span> <b>${m.name}:</b> ${m.text}</div>`;
+            });
+            box.scrollTop = box.scrollHeight;
+        });
+
         window.applyPromo = async () => {
             const input = document.getElementById('promo-input');
             const code = input.value.trim().toUpperCase();
             if (!code || usedPromos[code]) return;
-
             const snap = await get(child(ref(db), `promocodes/${code}`));
             if (snap.exists()) {
                 const val = snap.val().toLowerCase();
-                if (skinMap[val]) {
-                    currentSkin = val;
-                    alert("Скин активирован!");
-                } else {
-                    score += parseInt(val) || 0;
-                    alert("Монеты начислены!");
-                }
-                usedPromos[code] = true;
-                input.value = "";
-                save();
-                updateUI();
+                if (skinMap[val]) currentSkin = val;
+                else score += parseInt(val) || 0;
+                usedPromos[code] = true; input.value = ""; save(); updateUI();
             }
         };
 
-        // Кейсы
         document.getElementById('open-case').onclick = () => {
-            if (score < 1000) return alert("Нужно 1000 💰");
+            if (score < 1000) return alert("Мало монет!");
             score -= 1000;
             const res = document.getElementById('case-result');
-            res.innerText = "Удача улыбается...";
+            res.innerText = "Открываем...";
             setTimeout(() => {
                 const r = Math.random();
-                if (r < 0.05) { currentSkin = 'gold'; res.innerText = "ВЫПАЛ GOLD! 👑"; }
-                else if (r < 0.15) { currentSkin = 'blackwhite'; res.innerText = "ВЫПАЛ BW! ☯️"; }
+                if (r < 0.05) { currentSkin = 'gold'; res.innerText = "GOLD! 👑"; }
                 else { 
-                    let win = Math.floor(Math.random() * 6000); 
-                    score += win; res.innerText = `Вам выпало ${win} 💰`; 
+                    let win = Math.floor(Math.random() * 5000); score += win; res.innerText = `+${win} 💰`; 
                 }
                 updateUI(); save();
             }, 800);
         };
 
-        // Загрузка данных
         onValue(ref(db, 'users/' + myId), (snap) => {
             const d = snap.val();
             if (d) {
                 currentSkin = d.skin || "default";
                 usedPromos = d.usedPromos || {};
+                level = d.level || 1;
+                xp = d.xp || 0;
                 if (score === 0) score = d.score || 0;
                 myName = d.name || myName;
                 updateUI();
             }
         });
 
-        // ЛОГИКА ТАБЛИЦЫ ЛИДЕРОВ
         onValue(query(ref(db, 'users'), orderByChild('score'), limitToLast(10)), (snap) => {
             const data = snap.val(); if (!data) return;
-            // Превращаем объект в массив и сортируем
-            const players = Object.entries(data)
-                .map(([id, p]) => ({ id, ...p }))
-                .sort((a, b) => b.score - a.score);
-
+            const players = Object.entries(data).map(([id, p]) => ({ id, ...p })).sort((a, b) => b.score - a.score);
             document.getElementById('leaders').innerHTML = players.map((p, i) => `
                 <div class="entry ${p.id === myId ? 'is-me' : ''}">
-                    <span>
-                        <span class="rank">${i + 1}</span>
-                        ${skinMap[p.skin]?.emoji || '🔘'} ${p.name}
-                    </span>
+                    <span>${i + 1}. <span style="font-size:10px; color:#fbbf24;">Lvl ${p.level || 1}</span> ${p.name}</span>
                     <span>${p.score.toLocaleString()}</span>
                 </div>
             `).join('');
         });
 
         window.changeName = () => {
-            let n = prompt("Твой новый ник:", myName);
-            if (n && n.length < 15) { myName = n; save(); }
+            let n = prompt("Ник:", myName);
+            if (n && n.length < 12) { myName = n; save(); }
         };
     </script>
 </body>
