@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Clicker MMO — Ultra Cases & Skins</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #050505; color: white; text-align: center; margin: 0; padding: 20px; }
+        .tg-link { position: fixed; top: 15px; right: 15px; width: 45px; height: 45px; background: #229ED9; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; z-index: 100; }
+        #ban-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; color: #ff3333; z-index: 9999; flex-direction: column; align-items: center; justify-content: center; }
+        .score-box { font-size: 50px; margin: 10px; color: #fff; font-weight: 900; }
+        
+        #click-btn {
+            width: 180px; height: 180px; border-radius: 50%; border: none; font-size: 70px; cursor: pointer; 
+            transition: 0.1s; margin: 20px auto; display: flex; align-items: center; justify-content: center;
+        }
+        #click-btn:active { transform: scale(0.85); }
+
+        /* СКИНЫ */
+        .skin-default { background: linear-gradient(135deg, #3b82f6, #1d4ed8); border: 4px solid #60a5fa; }
+        .skin-gold { background: linear-gradient(135deg, #facc15, #eab308); box-shadow: 0 0 40px #ca8a04; border: 4px solid #fef08a; }
+        .skin-blackwhite { background: linear-gradient(45deg, #000 50%, #fff 50%); border: 4px solid #666; }
+        .skin-diamond { background: linear-gradient(135deg, #00f2fe, #4facfe); box-shadow: 0 0 50px #00f2fe; border: 4px solid #fff; }
+
+        .panel { background: #111; padding: 15px; border-radius: 25px; margin-bottom: 12px; border: 1px solid #222; }
+        .btn { padding: 12px; border-radius: 12px; border: none; cursor: pointer; font-weight: bold; width: 100%; }
+        .btn-case { background: linear-gradient(to right, #f59e0b, #ef4444); color: white; font-size: 18px; }
+        input { background: #1a1a1a; border: 1px solid #333; color: white; padding: 12px; border-radius: 12px; width: 60%; }
+        
+        .leaderboard { background: #0a0a0a; border-radius: 25px; padding: 20px; text-align: left; }
+        .entry { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #111; }
+    </style>
+</head>
+<body>
+
+    <a href="https://t.me/standkill_private" target="_blank" class="tg-link">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm5.891 8.146l-2.003 9.464c-.149.659-.541.823-1.091.511l-3.051-2.25-1.47 1.416c-.163.163-.299.299-.614.299l.219-3.104 5.65-5.103c.245-.218-.054-.339-.379-.122l-6.983 4.397-3.006-.941c-.654-.204-.667-.654.137-.967l11.737-4.522c.544-.204 1.018.121.864.818z"/></svg>
+    </a>
+
+    <div id="ban-screen">
+        <h1>БАН ⛔</h1>
+        <div id="ban-timer"></div>
+    </div>
+
+    <div id="game-content">
+        <div id="player-display" onclick="changeName()" style="color: #666; cursor: pointer;">Загрузка...</div>
+        <div class="score-box"><span id="score">0</span> 💰</div>
+
+        <button id="click-btn" class="skin-default">🔘</button>
+
+        <div class="panel">
+            <button class="btn btn-case" id="open-case">ОТКРЫТЬ КЕЙС (1000 💰)</button>
+            <div id="case-result" style="margin-top: 10px; color: #fbbf24; font-weight: bold;"></div>
+        </div>
+
+        <div class="panel">
+            <input type="text" id="promo-input" placeholder="Промокод">
+            <button class="btn" onclick="applyPromo()" style="background:#fff; color:#000; width:30%; display: inline-block;">OK</button>
+        </div>
+
+        <div class="leaderboard"><div id="leaders"></div></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, set, onValue, query, orderByChild, limitToLast, update, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyB6UkjtQQR2UzJdSL7aendfBzct4KNFCf4",
+            authDomain: "clickerok.firebaseapp.com",
+            databaseURL: "https://clickerok-default-rtdb.firebaseio.com",
+            projectId: "clickerok",
+            appId: "1:297008765880:web:3b6b9e242b58ce20994d4d"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        let myId = localStorage.getItem('my_unique_id') || 'u' + Date.now();
+        localStorage.setItem('my_unique_id', myId);
+
+        let score = 0, myName = "Игрок", currentSkin = "default", isBanned = false, usedPromos = {};
+
+        const skinMap = {
+            'gold': { emoji: '👑', multi: 10 },
+            'blackwhite': { emoji: '☯️', multi: 2 },
+            'diamond': { emoji: '💎', multi: 25 },
+            'default': { emoji: '🔘', multi: 1 }
+        };
+
+        function updateUI() {
+            const now = Math.floor(Date.now() / 1000);
+            if (isBanned && (isBanned === true || isBanned === "permanent" || isBanned > now)) {
+                document.getElementById('ban-screen').style.display = 'flex';
+                document.getElementById('game-content').style.display = 'none';
+                return;
+            }
+            document.getElementById('ban-screen').style.display = 'none';
+            document.getElementById('game-content').style.display = 'block';
+            document.getElementById('score').innerText = score.toLocaleString();
+            document.getElementById('player-display').innerText = myName;
+            document.getElementById('click-btn').className = 'skin-' + currentSkin;
+            document.getElementById('click-btn').innerText = skinMap[currentSkin]?.emoji || '🔘';
+        }
+
+        function save() {
+            update(ref(db, 'users/' + myId), {
+                name: myName, score: score, skin: currentSkin, usedPromos: usedPromos
+            });
+        }
+
+        document.getElementById('click-btn').addEventListener('pointerdown', () => {
+            score += (skinMap[currentSkin]?.multi || 1);
+            updateUI();
+            if (score % 20 === 0) save();
+        });
+
+        // ЛОГИКА КЕЙСОВ
+        document.getElementById('open-case').onclick = () => {
+            if (score < 1000) return alert("Недостаточно монет! Нужно 1000 💰");
+            score -= 1000;
+            const resDiv = document.getElementById('case-result');
+            resDiv.innerText = "💎 Открытие... 💎";
+            
+            setTimeout(() => {
+                const rand = Math.random();
+                if (rand < 0.01) {
+                    currentSkin = 'diamond';
+                    resDiv.innerText = "⭐ РЕДЧАЙШИЙ АЛМАЗНЫЙ СКИН! 💎";
+                } else if (rand < 0.04) {
+                    currentSkin = 'gold';
+                    resDiv.innerText = "🔥 ВЫПАЛ ЗОЛОТОЙ СКИН! 👑";
+                } else if (rand < 0.12) {
+                    currentSkin = 'blackwhite';
+                    resDiv.innerText = "ВЫПАЛ ЧЕРНО-БЕЛЫЙ СКИН! ☯️";
+                } else if (rand < 0.20) {
+                    let jackpot = Math.floor(Math.random() * 10000) + 5000;
+                    score += jackpot;
+                    resDiv.innerText = `💰 ДЖЕКПОТ: +${jackpot} МОНЕТ!`;
+                } else {
+                    let win = Math.floor(Math.random() * 4000);
+                    score += win;
+                    resDiv.innerText = `Выпало: +${win} 💰`;
+                }
+                updateUI();
+                save();
+            }, 1000);
+        };
+
+        window.applyPromo = async () => {
+            const code = document.getElementById('promo-input').value.trim().toUpperCase();
+            const snap = await get(child(ref(db), `promocodes/${code}`));
+            if (snap.exists() && !usedPromos[code]) {
+                const v = snap.val();
+                if (skinMap[v.toLowerCase()]) currentSkin = v.toLowerCase();
+                else score += parseInt(v);
+                usedPromos[code] = true; save();
+                alert("Успешно!");
+            }
+        };
+
+        onValue(ref(db, 'users/' + myId), (snap) => {
+            const d = snap.val();
+            if (d) {
+                isBanned = d.isBanned || false;
+                currentSkin = d.skin || "default";
+                usedPromos = d.usedPromos || {};
+                if (score === 0) score = d.score || 0;
+                myName = d.name || myName;
+                updateUI();
+            }
+        });
+
+        onValue(query(ref(db, 'users'), orderByChild('score'), limitToLast(10)), (snap) => {
+            const players = Object.values(snap.val() || {}).sort((a,b) => b.score - a.score);
+            document.getElementById('leaders').innerHTML = players.map((p, i) => 
+                `<div class="entry"><span>${i+1}. ${p.name} ${p.isBanned ? '🚫' : ''}</span><span>${p.score}</span></div>`
+            ).join('');
+        });
+
+        window.changeName = () => {
+            let n = prompt("Ник:", myName);
+            if (n) { myName = n; save(); }
+        };
+    </script>
+</body>
+</html>
