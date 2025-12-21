@@ -3,88 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clicker MMO — Levels & Experience</title>
+    <title>8-Bit Clicker MMO Ultra</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #050505; color: white; text-align: center; margin: 0; padding: 20px; }
-        .score-box { font-size: 45px; margin: 10px; font-weight: 900; }
+        body { font-family: 'Courier New', Courier, monospace; background: #050505; color: white; text-align: center; margin: 0; padding: 20px; user-select: none; }
+        .score-box { font-size: 40px; margin: 10px; font-weight: 900; color: #00ff00; text-shadow: 3px 3px #005500; }
         
-        /* ШКАЛА УРОВНЯ */
-        .level-container { width: 80%; background: #222; height: 10px; border-radius: 5px; margin: 0 auto 20px; overflow: hidden; border: 1px solid #333; }
-        #level-bar { width: 0%; height: 100%; background: linear-gradient(to right, #3b82f6, #00f2fe); transition: 0.3s; }
-        #level-text { font-size: 14px; color: #aaa; margin-bottom: 5px; }
-
+        .level-container { width: 80%; background: #222; height: 12px; border: 2px solid #fff; margin: 0 auto 10px; overflow: hidden; }
+        #level-bar { width: 0%; height: 100%; background: #3b82f6; transition: 0.3s; }
+        
         #click-btn { 
-            width: 170px; height: 170px; border-radius: 50%; border: none; font-size: 70px; cursor: pointer; 
-            transition: 0.1s; margin: 10px auto; display: flex; align-items: center; justify-content: center; 
+            width: 140px; height: 140px; border: 6px solid #fff; font-size: 60px; cursor: pointer; 
+            margin: 10px auto; display: flex; align-items: center; justify-content: center;
+            background: #3b82f6; box-shadow: 6px 6px 0px #0000aa; outline: none;
         }
-        #click-btn:active { transform: scale(0.85); }
+        #click-btn:active { transform: translate(3px, 3px); box-shadow: 2px 2px 0px #0000aa; }
 
-        /* СКИНЫ */
-        .skin-default { background: #3b82f6; border: 4px solid #60a5fa; }
-        .skin-gold { background: #facc15; box-shadow: 0 0 30px #ca8a04; border: 4px solid #fff; }
-        .skin-blackwhite { background: linear-gradient(45deg, #000 50%, #fff 50%); border: 4px solid #666; }
-        .skin-diamond { background: #00f2fe; box-shadow: 0 0 40px #4facfe; border: 4px solid #fff; }
-        .skin-cyber { background: #ff00ff; box-shadow: 0 0 30px #ff00ff; border: 4px solid #fff; }
-        .skin-inferno { background: #ef4444; box-shadow: 0 0 30px #7f1d1d; border: 4px solid #fca5a5; }
-        .skin-emerald { background: #10b981; box-shadow: 0 0 30px #064e3b; border: 4px solid #34d399; }
-        .skin-void { background: #111; box-shadow: 0 0 20px #444; border: 4px solid #666; }
-
-        .panel { background: #111; padding: 15px; border-radius: 20px; margin-bottom: 12px; border: 1px solid #222; }
-        .btn { padding: 12px; border-radius: 12px; border: none; cursor: pointer; font-weight: bold; }
-        input { background: #1a1a1a; border: 1px solid #333; color: white; padding: 12px; border-radius: 12px; font-size: 14px; }
-
+        .panel { background: #111; padding: 10px; border: 2px solid #333; margin-bottom: 10px; border-radius: 8px; }
+        .btn { padding: 10px; border: 2px solid #fff; cursor: pointer; font-weight: bold; background: #444; color: white; margin: 5px; font-family: inherit; }
+        
         /* ЧАТ */
-        #chat-box { height: 180px; overflow-y: auto; text-align: left; padding: 10px; background: #0a0a0a; border-radius: 15px; border: 1px solid #222; margin-bottom: 10px; font-size: 13px; }
-        .msg { margin-bottom: 6px; border-bottom: 1px solid #111; padding-bottom: 4px; }
+        #chat-box { height: 120px; overflow-y: auto; background: #000; border: 1px solid #333; text-align: left; padding: 5px; font-size: 12px; margin-bottom: 5px; }
+        .msg { margin-bottom: 4px; border-bottom: 1px solid #111; }
         .msg b { color: #38bdf8; }
-        .lvl-tag { color: #fbbf24; font-size: 11px; margin-right: 5px; font-weight: bold; }
 
-        /* ТАБЛИЦА */
-        .leaderboard { background: #0a0a0a; border-radius: 20px; padding: 15px; text-align: left; border: 1px solid #111; }
-        .entry { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #111; font-size: 14px; }
-        .is-me { color: #38bdf8; background: rgba(56, 189, 248, 0.05); border-radius: 8px; }
+        /* ИНВЕНТАРЬ */
+        .inventory { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; margin-top: 10px; }
+        .inv-item { width: 45px; height: 45px; border: 2px solid #555; display: flex; align-items: center; justify-content: center; background: #222; cursor: pointer; font-size: 24px; }
+        .inv-item.active { border-color: #00ff00; background: #004400; }
+
+        /* ТАБЛИЦА ЛИДЕРОВ */
+        .leaderboard { background: #0a0a0a; border: 2px solid #222; padding: 10px; text-align: left; margin-top: 15px; }
+        .entry { display: flex; justify-content: space-between; padding: 5px; border-bottom: 1px solid #111; font-size: 13px; }
+        .is-me { color: #38bdf8; background: rgba(56, 189, 248, 0.1); }
+
+        #gift-modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #111; border: 4px solid #f59e0b; padding: 20px; z-index: 100; }
     </style>
 </head>
 <body>
 
-    <div id="game-content">
-        <div id="player-display" onclick="changeName()" style="color: #666; cursor: pointer; margin-bottom: 5px;">Загрузка...</div>
-        
-        <div id="level-text">Уровень 1</div>
-        <div class="level-container"><div id="level-bar"></div></div>
+    <div id="gift-modal">
+        <h2 style="color: #f59e0b;">🎁 АДМИН ВЫДАЛ КЕЙС!</h2>
+        <button class="btn" onclick="handleGift('open')">ОТКРЫТЬ</button>
+        <button class="btn" onclick="handleGift('save')">В ИНВЕНТАРЬ</button>
+    </div>
 
-        <div class="score-box"><span id="score">0</span> 💰</div>
+    <div id="player-display" onclick="changeName()" style="color: #aaa; cursor: pointer;">Загрузка...</div>
+    <div id="level-text">Lvl 1</div>
+    <div class="level-container"><div id="level-bar"></div></div>
 
-        <button id="click-btn" class="skin-default">🔘</button>
+    <div id="daily-quest" style="color: #fbbf24; font-size: 12px;">Квест: 0/100 кликов</div>
+    <div class="score-box"><span id="score">0</span> 💰</div>
 
-        <div class="panel">
-            <button class="btn" id="open-case" style="background: #f59e0b; color: white; width: 100%;">ОТКРЫТЬ КЕЙС (1000 💰)</button>
-            <div id="case-result" style="margin-top: 8px; color: #fbbf24; font-size: 14px; font-weight: bold;"></div>
-        </div>
+    <button id="click-btn">🔘</button>
 
-        <div class="panel">
-            <h3 style="margin: 0 0 10px 0; font-size: 12px; color: #444;">ЧАТ ИГРОКОВ</h3>
-            <div id="chat-box"></div>
-            <div style="display: flex; gap: 5px;">
-                <input type="text" id="chat-input" placeholder="Сообщение..." style="flex-grow: 1;">
-                <button class="btn" onclick="sendMsg()" style="background: #3b82f6; color: white;">></button>
-            </div>
-        </div>
+    <div class="panel">
+        <button class="btn" id="open-case" style="background: #f59e0b; width: 90%;">КУПИТЬ КЕЙС (1000 💰)</button>
+        <div id="case-result"></div>
+    </div>
 
-        <div class="panel">
-            <input type="text" id="promo-input" placeholder="Промокод" style="width: 60%;">
-            <button class="btn" onclick="applyPromo()" style="background:#fff; color:#000; width:30%;">OK</button>
-        </div>
+    <div class="panel">
+        <div style="font-size: 10px; color: #888; margin-bottom: 5px;">ИНВЕНТАРЬ СКИНОФ</div>
+        <div id="inventory-list" class="inventory"></div>
+        <div id="case-count" style="color: #f59e0b; font-size: 12px; margin-top: 8px;">Кейсов в запасе: 0</div>
+        <button class="btn" onclick="openSavedCase()" style="font-size: 10px;">Открыть запасной</button>
+    </div>
 
-        <div class="leaderboard">
-            <div style="text-align: center; color: #444; font-size: 11px; margin-bottom: 8px;">ТОП-10 МАГНАТОВ</div>
-            <div id="leaders"></div>
+    <div class="panel">
+        <input type="text" id="promo-input" placeholder="Промокод" style="width: 60%; padding: 8px;">
+        <button class="btn" onclick="applyPromo()" style="padding: 8px;">OK</button>
+    </div>
+
+    <div class="panel">
+        <div id="chat-box"></div>
+        <div style="display: flex; gap: 5px;">
+            <input type="text" id="chat-input" placeholder="Сообщение..." style="flex-grow: 1; padding: 8px;">
+            <button class="btn" onclick="sendMsg()" style="margin: 0;">></button>
         </div>
     </div>
 
+    <div class="leaderboard">
+        <div style="text-align: center; font-size: 12px; color: #444;">ТОП МАГНАТОВ</div>
+        <div id="leaders"></div>
+    </div>
+
+    <button class="btn" onclick="resetAccount()" style="background: #400; font-size: 8px; margin-top: 20px;">СБРОСИТЬ ВСЁ</button>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, get, child, update, onValue, query, orderByChild, limitToLast, push, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, set, get, update, onValue, push, serverTimestamp, remove, query, orderByChild, limitToLast, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyB6UkjtQQR2UzJdSL7aendfBzct4KNFCf4",
@@ -97,132 +103,173 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
+        // --- ЗВУКИ ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playNote(f, t, d, v = 0.1) {
+            const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
+            o.type = t; o.frequency.setValueAtTime(f, audioCtx.currentTime);
+            g.gain.setValueAtTime(v, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + d);
+            o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime + d);
+        }
+
+        let musicStarted = false;
+        function startMusic() {
+            if (musicStarted) return; musicStarted = true;
+            setInterval(() => {
+                playNote(60, 'sine', 0.2, 0.2); // Kick
+                setTimeout(() => playNote(120, 'square', 0.05, 0.05), 125); // Hi-hat
+            }, 250);
+        }
+
+        // --- ЛОГИКА ---
         let myId = localStorage.getItem('my_unique_id') || 'u' + Date.now();
         localStorage.setItem('my_unique_id', myId);
 
-        let score = 0, myName = "Игрок", currentSkin = "default", usedPromos = {}, level = 1, xp = 0;
-
+        let state = { score: 0, xp: 0, level: 1, name: "Игрок", skin: 'default', inventory: ['default'], cases: 0, dailyClicks: 0, lastDate: '', usedPromos: {} };
         const skinMap = {
             'default': { emoji: '🔘', multi: 1 },
             'gold': { emoji: '👑', multi: 10 },
-            'blackwhite': { emoji: '☯️', multi: 2 },
             'diamond': { emoji: '💎', multi: 25 },
             'cyber': { emoji: '👾', multi: 7 },
-            'inferno': { emoji: '🔥', multi: 8 },
-            'emerald': { emoji: '🌿', multi: 5 },
-            'void': { emoji: '🌌', multi: 15 }
+            'inferno': { emoji: '🔥', multi: 8 }
         };
 
+        let lastClick = 0;
+        document.getElementById('click-btn').addEventListener('pointerdown', (e) => {
+            if (!e.isTrusted || Date.now() - lastClick < 90) return; // Анти-автокликер
+            lastClick = Date.now();
+            startMusic();
+            playNote(200 + Math.random()*100, 'square', 0.05);
+
+            let gain = skinMap[state.skin].multi;
+            state.score += gain;
+            state.xp += gain;
+            state.dailyClicks++;
+
+            if (state.xp >= state.level * 200) {
+                state.level++; state.xp = 0;
+                playNote(500, 'square', 0.3); alert("НОВЫЙ LVL: " + state.level);
+            }
+            updateUI();
+            if (state.score % 15 === 0) save();
+        });
+
         function updateUI() {
-            document.getElementById('score').innerText = score.toLocaleString();
-            document.getElementById('player-display').innerText = myName;
-            
-            // Расчет шкалы опыта
-            let nextLevelXp = level * 100; 
-            let progress = (xp / nextLevelXp) * 100;
-            document.getElementById('level-bar').style.width = progress + "%";
-            document.getElementById('level-text').innerText = `Уровень ${level} (${xp}/${nextLevelXp} XP)`;
+            document.getElementById('score').innerText = state.score.toLocaleString();
+            document.getElementById('player-display').innerText = state.name;
+            document.getElementById('level-text').innerText = `Lvl ${state.level}`;
+            document.getElementById('level-bar').style.width = (state.xp / (state.level * 200) * 100) + "%";
+            document.getElementById('case-count').innerText = `Кейсов в запасе: ${state.cases}`;
+            document.getElementById('daily-quest').innerText = `Квест: ${Math.min(state.dailyClicks, 100)}/100 кликов`;
+            document.getElementById('click-btn').innerText = skinMap[state.skin].emoji;
 
-            const btn = document.getElementById('click-btn');
-            btn.className = 'skin-' + currentSkin;
-            btn.innerText = skinMap[currentSkin]?.emoji || '🔘';
-        }
-
-        function save() {
-            update(ref(db, 'users/' + myId), {
-                name: myName, score: score, skin: currentSkin, usedPromos: usedPromos, level: level, xp: xp
+            const invDiv = document.getElementById('inventory-list');
+            invDiv.innerHTML = "";
+            state.inventory.forEach(s => {
+                const item = document.createElement('div');
+                item.className = `inv-item ${state.skin === s ? 'active' : ''}`;
+                item.innerText = skinMap[s].emoji;
+                item.onclick = () => { state.skin = s; updateUI(); save(); };
+                invDiv.appendChild(item);
             });
         }
 
-        document.getElementById('click-btn').addEventListener('pointerdown', () => {
-            let gain = (skinMap[currentSkin]?.multi || 1);
-            score += gain;
-            xp += gain; // Опыт идет от силы клика
+        function save() { update(ref(db, 'users/' + myId), state); }
 
-            // Проверка повышения уровня
-            if (xp >= level * 100) {
-                xp = 0;
-                level++;
-                alert("НОВЫЙ УРОВЕНЬ: " + level + "! 🎉");
-            }
+        window.resetAccount = () => { if(confirm("Сбросить всё?")) { remove(ref(db, 'users/'+myId)); localStorage.clear(); location.reload(); }};
 
-            updateUI();
-            if (score % 25 === 0) save();
-        });
-
+        // --- ЧАТ РАБОТАЕТ ---
         window.sendMsg = () => {
-            const input = document.getElementById('chat-input');
-            const text = input.value.trim();
-            if (!text) return;
-            push(ref(db, 'chat'), { name: myName, text: text, level: level, time: serverTimestamp() });
-            input.value = "";
+            const val = document.getElementById('chat-input').value.trim();
+            if (!val) return;
+            push(ref(db, 'chat'), { name: state.name, text: val, lvl: state.level, time: serverTimestamp() });
+            document.getElementById('chat-input').value = "";
         };
 
         onValue(query(ref(db, 'chat'), limitToLast(15)), (snap) => {
-            const box = document.getElementById('chat-box');
-            box.innerHTML = "";
-            snap.forEach((child) => {
-                const m = child.val();
-                box.innerHTML += `<div class="msg"><span class="lvl-tag">[Lvl ${m.level || 1}]</span> <b>${m.name}:</b> ${m.text}</div>`;
+            const box = document.getElementById('chat-box'); box.innerHTML = "";
+            snap.forEach(c => {
+                const m = c.val();
+                box.innerHTML += `<div class="msg"><b>[L${m.lvl}] ${m.name}:</b> ${m.text}</div>`;
             });
             box.scrollTop = box.scrollHeight;
         });
 
-        window.applyPromo = async () => {
-            const input = document.getElementById('promo-input');
-            const code = input.value.trim().toUpperCase();
-            if (!code || usedPromos[code]) return;
-            const snap = await get(child(ref(db), `promocodes/${code}`));
-            if (snap.exists()) {
-                const val = snap.val().toLowerCase();
-                if (skinMap[val]) currentSkin = val;
-                else score += parseInt(val) || 0;
-                usedPromos[code] = true; input.value = ""; save(); updateUI();
-            }
-        };
-
-        document.getElementById('open-case').onclick = () => {
-            if (score < 1000) return alert("Мало монет!");
-            score -= 1000;
-            const res = document.getElementById('case-result');
-            res.innerText = "Открываем...";
-            setTimeout(() => {
-                const r = Math.random();
-                if (r < 0.05) { currentSkin = 'gold'; res.innerText = "GOLD! 👑"; }
-                else { 
-                    let win = Math.floor(Math.random() * 5000); score += win; res.innerText = `+${win} 💰`; 
-                }
-                updateUI(); save();
-            }, 800);
-        };
-
-        onValue(ref(db, 'users/' + myId), (snap) => {
-            const d = snap.val();
-            if (d) {
-                currentSkin = d.skin || "default";
-                usedPromos = d.usedPromos || {};
-                level = d.level || 1;
-                xp = d.xp || 0;
-                if (score === 0) score = d.score || 0;
-                myName = d.name || myName;
-                updateUI();
-            }
-        });
-
+        // --- ТОП ЛИДЕРОВ ---
         onValue(query(ref(db, 'users'), orderByChild('score'), limitToLast(10)), (snap) => {
-            const data = snap.val(); if (!data) return;
-            const players = Object.entries(data).map(([id, p]) => ({ id, ...p })).sort((a, b) => b.score - a.score);
+            const players = []; snap.forEach(c => { players.push({id: c.key, ...c.val()}) });
+            players.sort((a,b) => b.score - a.score);
             document.getElementById('leaders').innerHTML = players.map((p, i) => `
                 <div class="entry ${p.id === myId ? 'is-me' : ''}">
-                    <span>${i + 1}. <span style="font-size:10px; color:#fbbf24;">Lvl ${p.level || 1}</span> ${p.name}</span>
+                    <span>${i+1}. ${p.name} (Lvl ${p.level})</span>
                     <span>${p.score.toLocaleString()}</span>
                 </div>
             `).join('');
         });
 
+        // --- ПРОМОКОДЫ ---
+        window.applyPromo = async () => {
+            const code = document.getElementById('promo-input').value.toUpperCase();
+            if (!code || state.usedPromos?.[code]) return;
+            const snap = await get(child(ref(db), `promocodes/${code}`));
+            if (snap.exists()) {
+                const val = snap.val();
+                if (skinMap[val]) { if(!state.inventory.includes(val)) state.inventory.push(val); }
+                else state.score += parseInt(val) || 0;
+                if (!state.usedPromos) state.usedPromos = {};
+                state.usedPromos[code] = true;
+                alert("Промокод принят!"); updateUI(); save();
+            }
+        };
+
+        // --- КЕЙСЫ И ПОДАРКИ ---
+        onValue(ref(db, `users/${myId}/gift`), (snap) => {
+            if (snap.val() === 'case') {
+                document.getElementById('gift-modal').style.display = 'block';
+                update(ref(db, `users/${myId}`), { gift: null });
+            }
+        });
+
+        window.handleGift = (act) => {
+            document.getElementById('gift-modal').style.display = 'none';
+            act === 'open' ? runCase() : (state.cases++, updateUI(), save());
+        };
+
+        document.getElementById('open-case').onclick = () => {
+            if (state.score < 1000) return alert("Мало денег!");
+            state.score -= 1000; runCase();
+        };
+
+        window.openSavedCase = () => { if(state.cases > 0) { state.cases--; runCase(); } };
+
+        function runCase() {
+            const res = document.getElementById('case-result'); res.innerText = "ОТКРЫВАЕМ...";
+            setTimeout(() => {
+                const skins = Object.keys(skinMap).filter(s => s !== 'default');
+                const prize = skins[Math.floor(Math.random()*skins.length)];
+                if (!state.inventory.includes(prize)) {
+                    state.inventory.push(prize); res.innerText = "ВЫПАЛ: " + skinMap[prize].emoji;
+                } else {
+                    state.score += 500; res.innerText = "ПОВТОР! +500 💰";
+                }
+                updateUI(); save();
+            }, 1000);
+        }
+
+        // --- ЗАГРУЗКА ---
+        onValue(ref(db, 'users/' + myId), (snap) => {
+            const d = snap.val();
+            if (d) {
+                state = {...state, ...d};
+                const today = new Date().toLocaleDateString();
+                if (state.lastDate !== today) { state.dailyClicks = 0; state.lastDate = today; }
+                updateUI();
+            }
+        });
+
         window.changeName = () => {
-            let n = prompt("Ник:", myName);
-            if (n && n.length < 12) { myName = n; save(); }
+            let n = prompt("Ник:", state.name);
+            if (n && n.length < 12) { state.name = n; save(); }
         };
     </script>
 </body>
